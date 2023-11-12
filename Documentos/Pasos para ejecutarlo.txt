@@ -1,0 +1,19 @@
+Download links
+For CODEBLOCKS:-
+https://sourceforge.net/projects/code...
+
+For GnuWin32 :-
+https://sourceforge.net/projects/gnuw...
+
+
+Copy paths /bin in enviroments variables
+
+Type in command :-  flex filename.l
+Type in command :- gcc lex.yy.c
+Execute command :- a.exe   
+
+
+
+-- CON MAKE
+
+make.bat

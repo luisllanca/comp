@@ -1,0 +1,200 @@
+E’-> inicio E fin
+E -> escribir(“texto”); E
+E -> escribir(id); E
+E -> leer(id); E
+E -> asig; E
+E -> I E
+E -> ε
+asig -> id = A
+A -> A¹+A² 
+    {T = newtemp();
+    A.place = T
+    GEN(A.place = A¹.place + A².place)}
+A -> A¹-A²
+    {T = newtemp();
+    A.place = T
+    GEN(A.place = A¹.place - A².place)}
+A -> A¹*A²
+    {T = newtemp();
+    A.place = T
+    GEN(A.place = A¹.place * A².place)}
+A -> A¹+/A²
+    {T = newtemp();
+    A.place = T
+    GEN(A.place = A¹.place / A².place)}
+A -> id
+    {A.place = id.place}
+A -> num
+    {A.place = num.place}
+I -> si cond entonces E
+cond -> A¹ < A² 
+    {T=newtemp();
+    A.place=T;
+    GEN(if a¹.place < a².place goto NEXTQUAD+3);
+    GEN(T=0);
+    GEN(goto NEXTQUAD+2);
+    GEN(T=1);}
+cond -> A¹ > A² 
+    {T=newtemp();
+    A.place=T;
+    GEN(if a¹.place > a².place goto NEXTQUAD+3);
+    GEN(T=0);
+    GEN(goto NEXTQUAD+2);
+    GEN(T=1);}
+cond -> A¹ = A²
+    {T=newtemp();
+    A.place=T;
+    GEN(if a¹.place = a².place goto NEXTQUAD+3);
+    GEN(T=0);
+    GEN(goto NEXTQUAD+2);
+    GEN(T=1);}
+
+
+
+
+
+
+
+
+
+
+
+------------ CODIGO DESECHADO
+
+
+    
+// int main(int argc, char **argv) {
+//     if (argc != 2) {
+//         fprintf(stderr, "Usage: %s input_file\n", argv[0]);
+//         return 1;
+//     }
+
+//     // Open the input file
+//     yyin = fopen(argv[1], "r");
+//     if (!yyin) {
+//         perror("Error opening input file");
+//         return 1;
+//     }
+
+//     // Call yyparse to start parsing from the input file
+//     int parse_result = yyparse();
+
+//     // Close the input file
+//     fclose(yyin);
+
+//     // Check the parse result
+//     if (parse_result == 0) {
+//         printf("Parsing successful.\n");
+//     } else {
+//         printf("Parsing failed.\n");
+//     }
+
+//     return parse_result;
+// }
+
+// void yyerror(char *s) {
+//     printf("Error: %s\n", s);
+// }
+
+// int yywrap(){
+//     return 1;
+// }
+
+
+
+
+        statements: 
+                    | statements statement
+                    ;
+
+        statement: assignment
+                    | comparison
+                    | arithmetic_expr SEMICOLON { printf("Resultado de la operación aritmética: %d\n", $1); }
+                    ;
+
+        assignment: IDENTIFICADOR ASSIGN arithmetic_expr SEMICOLON { printf("Asignación: %s = %d\n", $1, $3); }
+          ;
+        
+        comparison: SI condition ENTONCES statements FIN { printf("Condición evaluada correctamente.\n"); }
+          ;
+
+        condition: arithmetic_expr COMPARISON arithmetic_expr { $$ = ($2 == '<') ? ($1 < $3) : ($2 == '>') ? ($1 > $3) : ($1 == $3); }
+         ;
+
+         arithmetic_expr: arithmetic_expr '+' arithmetic_expr { $$ = $1 + $3; }
+              | arithmetic_expr '-' arithmetic_expr { $$ = $1 - $3; }
+              | arithmetic_expr '*' arithmetic_expr { $$ = $1 * $3; }
+              | arithmetic_expr '/' arithmetic_expr { $$ = $1 / $3; }
+              | '(' arithmetic_expr ')' { $$ = $2; }
+              | DIGITO { $$ = $1; }
+              | IDENTIFICADOR { /* Recuperar identificador */ }
+              ;
+
+
+              
+
+------------------------------------
+
+
+
+        
+            
+        E:  IDENTIFICADOR ASSIGN expression E
+            {
+                printf("    %d\n",symbolCount);
+                strcpy(symbolTable[symbolCount].name, $1);
+                symbolTable[symbolCount].value = $3;
+                symbolCount++;
+            }
+            | LEER PRTS IDENTIFICADOR PRTS E
+            {
+                if (strcmp($2, "(") == 0 && strcmp($4, ")") == 0) {
+                    /* IMPRIME IDENTIFICADOR EN MEMORIA*/
+                    int i;
+                     for (i = 0; i < symbolCount; i++) {
+
+                        if (strcmp(symbolTable[i].name, $3) == 0) {
+                            printf("El valor de %s es %d\n", $3, symbolTable[i].value);
+                            break;  
+                        }
+                    }
+                }   
+            }
+            | ESCRIBIR PRTS QUOTES CADENA QUOTES PRTS SEMICOLON E
+            {
+                /* Imprime en pantalla el texto entre parentesis */
+                
+                if (strcmp($2, "(") == 0 && strcmp($6, ")") == 0) {
+                    printf("    %s\n", $4);
+                }
+            }
+            | 
+            ;
+
+
+        expression:
+            DIGITO { $$ = $1; }
+            | expression ARITHMETIC operation
+            { 
+                /* operaciones aritmeticas + - * / */
+
+                if (strcmp($2, "+") == 0) {
+                    $$ = $1 + $3;
+                } else if (strcmp($2, "-") == 0) {
+                    $$ = $1 - $3;
+                } else if (strcmp($2, "*") == 0) {
+                    $$ = $1 * $3;
+                } else if (strcmp($2, "/") == 0) {
+                    $$ = $1 / $3;
+                } 
+            }
+            ;
+
+        operation:
+            DIGITO { $$ = $1; }
+            | PRTS expression PRTS  
+            {
+                /* Se pueden concatenar expresiones 1 + (1 + 2)*/
+                $$ = $2; 
+            }
+            ;
